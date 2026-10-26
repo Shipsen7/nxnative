@@ -1,0 +1,259 @@
+[
+  {
+    "file": "dm/tools/tests/test_astral_fps.py",
+    "exit": 0,
+    "tests": 9,
+    "skipped": [
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'",
+      "'optional ARM64 execution dependency: unicorn'"
+    ]
+  },
+  {
+    "file": "dm/tools/tests/test_bench.py",
+    "exit": 0,
+    "tests": 6,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_docs.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_gpuprof.py",
+    "exit": 0,
+    "tests": 6,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_image_atomic_bounds.py",
+    "exit": 0,
+    "tests": 12,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_jump_copies.py",
+    "exit": 0,
+    "tests": 17,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_launcher_settings.py",
+    "exit": 0,
+    "tests": 5,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nro_graphics.py",
+    "exit": 0,
+    "tests": 5,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nro_pack.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nso_match.py",
+    "exit": 0,
+    "tests": 13,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_alias.py",
+    "exit": 0,
+    "tests": 3,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_chain.py",
+    "exit": 0,
+    "note": "Reran after fixing symlink source paths and header destination; 12 tests passed.",
+    "tests": 12,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_dotnet.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_incremental.py",
+    "exit": 0,
+    "tests": 28,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_mac.py",
+    "exit": 0,
+    "tests": 11,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_mac_app.py",
+    "exit": 0,
+    "tests": 38,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_nsz.py",
+    "exit": 0,
+    "tests": 6,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_nsp_progress.py",
+    "exit": 0,
+    "tests": 6,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_patches.py",
+    "exit": 0,
+    "tests": 14,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_profile_guess.py",
+    "exit": 0,
+    "tests": 1,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_pso_offline.py",
+    "exit": 0,
+    "tests": 15,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_security_guards.py",
+    "exit": 0,
+    "tests": 3,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_shader_regressions.py",
+    "exit": 0,
+    "tests": 8,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_size_prefixed_frames.py",
+    "exit": 0,
+    "tests": 6,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_spin_waits.py",
+    "exit": 0,
+    "tests": 5,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_tail_call.py",
+    "exit": 0,
+    "tests": 10,
+    "skipped": []
+  },
+  {
+    "file": "dm/tools/tests/test_unity_text_glslc.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_dmsh_geometry.py",
+    "exit": 0,
+    "tests": 10,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_dmsh_pull.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_dmsh_reflect.py",
+    "exit": 0,
+    "tests": 5,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_dmsh_vin.py",
+    "exit": 0,
+    "tests": 7,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_imga_binding_source.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_needle.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_pg_shader.py",
+    "exit": 0,
+    "tests": 3,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_pkz.py",
+    "exit": 0,
+    "tests": 2,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_tbdr_budget.py",
+    "exit": 0,
+    "tests": 5,
+    "skipped": []
+  },
+  {
+    "file": "dm/gfx/tests/test_unity_compute.py",
+    "exit": 0,
+    "tests": 1,
+    "skipped": []
+  },
+  {
+    "file": "dm/ios/tests/test_launcher_storage.py",
+    "exit": 0,
+    "tests": 1,
+    "skipped": []
+  },
+  {
+    "file": "dm/ios/tests/test_pack_ipa.py",
+    "exit": 0,
+    "tests": 22,
+    "skipped": []
+  },
+  {
+    "file": "dm/ios/tests/test_profile_pack.py",
+    "exit": 0,
+    "tests": 1,
+    "skipped": []
+  },
+  {
+    "file": "dm/ios/tests/test_xcode_workflow.py",
+    "exit": 0,
+    "tests": 4,
+    "skipped": []
+  }
+]

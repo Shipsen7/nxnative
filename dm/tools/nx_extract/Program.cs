@@ -29,7 +29,17 @@ static class P {
         bool manifest = Array.IndexOf(a, "--manifest") >= 0; a = Array.FindAll(a, s => s != "--manifest");
         g_allow = Array.IndexOf(a, "--allow-damaged") >= 0; a = Array.FindAll(a, s => s != "--allow-damaged");
         if (a.Length < 4) { Console.Error.WriteLine("usage: nx_extract <prod.keys> <base.nsp> <update.nsp|-> <out dir> [base RomFS dir] [--manifest] [--allow-damaged]\n       nx_extract <prod.keys> --aoc <dlc.nsp> <out dir>"); return 2; }
-        KeySet ks = ExternalKeyReader.ReadKeyFile(a[0]);
+        KeySet ks;
+        // Key-parser diagnostics and exceptions may quote private input. Keep
+        // that operation silent and report only a fixed, value-free error.
+        TextWriter output = Console.Out, error = Console.Error;
+        try {
+            Console.SetOut(TextWriter.Null); Console.SetError(TextWriter.Null);
+            ks = ExternalKeyReader.ReadKeyFile(a[0]);
+        } catch (Exception) {
+            error.WriteLine("[RED] Cannot read the local key file; parser details suppressed for privacy.");
+            return 2;
+        } finally { Console.SetOut(output); Console.SetError(error); }
         if (a[1] == "--aoc") return Aoc(ks, a[2], a[3]);
         var basePkg = OpenNsp(ks, a[1]); var updPkg = a[2] == "-" ? null : OpenNsp(ks, a[2]);
         Nca baseProg = Pick(basePkg, NcaContentType.Program) ?? throw new Exception("no Program NCA in the base NSP");

@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-26",
+  "result": "pass",
+  "chain": "ee93a40c81af",
+  "signed": false,
+  "installed_or_launched": false,
+  "inputs": "synthetic modules and resource fixtures only",
+  "bundle_id": "org.nxnative.ci",
+  "executable_sha256": "9f7110e5cc7e584f9c554f68eb8d20d076abf5399c2695f3e2b2a54e6cab019c",
+  "ipa_sha256": "f985ad36a795809748d9aaf4a67c1937f5e9fec82f806866e907f31d226f2fec",
+  "ipa_bytes": 1005225,
+  "zip_crc": "pass",
+  "staged_fixture_bytes": "match"
+}

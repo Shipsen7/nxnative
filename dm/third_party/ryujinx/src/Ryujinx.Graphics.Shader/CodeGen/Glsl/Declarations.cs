@@ -5,6 +5,7 @@ using Ryujinx.Graphics.Shader.Translation;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
@@ -637,7 +638,12 @@ namespace Ryujinx.Graphics.Shader.CodeGen.Glsl
 
         private static void AppendHelperFunction(CodeGenContext context, string filename)
         {
-            string code = EmbeddedResources.ReadAllText(filename);
+            // NXNative: all helper resources belong to this assembly. Read them
+            // directly without Common's unrelated pooled-stream/package stack.
+            using Stream stream = typeof(Declarations).Assembly.GetManifestResourceStream(filename.Replace('/', '.'))
+                ?? throw new InvalidOperationException($"Missing shader helper resource: {filename}");
+            using StreamReader reader = new(stream);
+            string code = reader.ReadToEnd();
 
             code = code.Replace("\t", CodeGenContext.Tab);
 

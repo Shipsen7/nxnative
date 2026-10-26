@@ -1,4 +1,4 @@
-// iOS App entry: set the environment (game files, saves, shader libraries), write the host log to Documents/log.txt, create the window (front_ios.m), then run the host's dm_main on a big-stack thread.
+// iOS App entry: set up local files and optional diagnostics, create the window, then run dm_main on a big-stack thread.
 // The game files (RomFS) ship inside the App at <App>/romfs; Documents/romfs placed through the Files app is also accepted (lets you swap them without reinstalling).
 #import <UIKit/UIKit.h>
 #include <pthread.h>
@@ -28,15 +28,11 @@ static int boot_env(void) {
     NSString *doc = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
     NSString *res = NSBundle.mainBundle.resourcePath;
     for (NSString *d in @[@"save", @"temp"]) [fm createDirectoryAtPath:[doc stringByAppendingPathComponent:d] withIntermediateDirectories:YES attributes:nil error:nil];
-    // Keep game files and scratch data out of device backups (Documents is backed up by default; a RomFS placed there is many GB). Saves, logs and the pipeline list stay in the backup
-    for (NSString *d in @[@"romfs", @"temp"]) {
+    // Keep game files, scratch data and diagnostic settings out of backups. Saves remain backed up and available in Files.
+    for (NSString *d in @[@"romfs", @"temp", @"env.txt", @"log.txt", @"log.prev.txt"]) {
         NSURL *u = [NSURL fileURLWithPath:[doc stringByAppendingPathComponent:d] isDirectory:YES]; NSError *e = nil;
         if ([fm fileExistsAtPath:u.path] && ![u setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:&e]) fprintf(stderr, "boot: %s could not be excluded from backup: %s\n", d.UTF8String, e.localizedDescription.UTF8String);
     }
-    // Log: the host only writes to stderr; redirect it to Documents/log.txt (the previous one is kept as log.prev.txt), retrieve it from the Files app when something goes wrong
-    NSString *log = [doc stringByAppendingPathComponent:@"log.txt"], *prev = [doc stringByAppendingPathComponent:@"log.prev.txt"];
-    [fm removeItemAtPath:prev error:nil]; [fm moveItemAtPath:log toPath:prev error:nil];
-    if (freopen(log.fileSystemRepresentation, "w", stderr)) setvbuf(stderr, NULL, _IOLBF, 0);
     // Environment switch files (for on-device diagnostics: a sideloaded app cannot be given environment variables from outside): one KEY=VALUE per line, # starts a comment; Documents/env.txt takes precedence over dm/env.txt in the bundle (put there by build_ipa.sh's DM_ENV_FILE)
     NSMutableArray<NSString *> *from_file = [NSMutableArray array];
     for (NSString *ef in @[[doc stringByAppendingPathComponent:@"env.txt"], [[res stringByAppendingPathComponent:@"dm"] stringByAppendingPathComponent:@"env.txt"]]) {
@@ -45,8 +41,26 @@ static int boot_env(void) {
             NSString *ln = [raw stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet]; NSRange eq = [ln rangeOfString:@"="];
             if (!ln.length || [ln hasPrefix:@"#"] || eq.location == NSNotFound || !eq.location) continue;
             NSString *k = [ln substringToIndex:eq.location], *v = [ln substringFromIndex:eq.location + 1];
-            if (!getenv(k.UTF8String)) { setenv(k.UTF8String, v.UTF8String, 0); [from_file addObject:k]; fprintf(stderr, "boot: env %s=%s (%s)\n", k.UTF8String, v.UTF8String, ef.lastPathComponent.UTF8String); }
+            // Diagnostic settings may contain private paths or credentials. Never log their values or names.
+            if (!getenv(k.UTF8String)) { setenv(k.UTF8String, v.UTF8String, 0); [from_file addObject:k]; }
         }
+    }
+    // Persistent diagnostics are opt-in through DM_DIAGNOSTICS=1 in env.txt.
+    // Diagnostic host output can contain paths/game details, so ordinary runs
+    // discard it. Turning diagnostics off removes the two previous local logs.
+    NSString *log = [doc stringByAppendingPathComponent:@"log.txt"], *prev = [doc stringByAppendingPathComponent:@"log.prev.txt"];
+    const char *diagnostics = getenv("DM_DIAGNOSTICS");
+    if (diagnostics && !strcmp(diagnostics, "1")) {
+        [fm removeItemAtPath:prev error:nil]; [fm moveItemAtPath:log toPath:prev error:nil];
+        if (freopen(log.fileSystemRepresentation, "w", stderr)) setvbuf(stderr, NULL, _IOLBF, 0);
+        else freopen("/dev/null", "w", stderr);
+        for (NSString *p in @[log, prev]) {
+            NSURL *u = [NSURL fileURLWithPath:p];
+            if ([fm fileExistsAtPath:p]) [u setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:nil];
+        }
+    } else {
+        [fm removeItemAtPath:log error:nil]; [fm removeItemAtPath:prev error:nil];
+        freopen("/dev/null", "w", stderr);
     }
     setenv("DM_ENV_FILE_KEYS", [from_file componentsJoinedByString:@" "].UTF8String, 1);   // the launcher keeps what an env file set (Launcher.swift)
     front_hud_env();   // before the early loading below can make a device
@@ -57,7 +71,7 @@ static int boot_env(void) {
     fprintf(stderr, "boot: game language %s\n", getenv("DM_LANG") ?: "en-US");
     NSString *romfs = romfs_locate();
     if (!romfs) { fprintf(stderr, "boot: game files not found (<App>/romfs or Documents/romfs)\n"); return 0; }
-    fprintf(stderr, "boot: game files %s\n", romfs.fileSystemRepresentation);
+    fprintf(stderr, "boot: game files located\n");
     setenv("DM_ROMFS", romfs.fileSystemRepresentation, 0);
     setenv("DM_SAVE", [doc stringByAppendingPathComponent:@"save"].fileSystemRepresentation, 0);
     setenv("DM_TEMP", [doc stringByAppendingPathComponent:@"temp"].fileSystemRepresentation, 0);

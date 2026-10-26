@@ -13,9 +13,11 @@
 #       dmsh_chain.py --update-lock   rewrite the lock file from the actual tools (run after changing Ryujinx / spirv-cross / Xcode; committed to the repo)
 # Environment: XLATE_DEBUG / XLATE_REDUCED (same meaning as in dmsh_build.py, default 1 / 1; non-default options yield a different V, which the host will not load)
 import os, sys, hashlib, subprocess
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../scripts'))
+import build_dotnet_tools
 DM_ROOT = os.environ.get('DM_ROOT') or os.path.expanduser('~/dm-work')   # Workspace root (game files, build outputs and run artifacts are all under it)
-HERE = os.path.dirname(os.path.abspath(__file__)); GFX = os.path.dirname(HERE); HOME = os.path.expanduser('~')
-FILES = ['tools/dmsh_chain.py', 'tools/dmsh_build.py', 'tools/dmsh_atomic.py', 'tools/dmsh_fetch.py', 'tools/dmsh_vin.py', 'tools/dmsh_pull.py', 'tools/dmsh_pull.metal', 'tools/dmsh_geometry.py', 'tools/dmsh_facts.py', 'tools/dmsh_xlate/Program.cs', 'tools/dmsh_xlate/dmsh_xlate.csproj', '../ios/tools/ios_metal.py', 'tools/dmsh_chain.lock']
+HERE = os.path.dirname(os.path.realpath(__file__)); GFX = os.path.dirname(HERE); HOME = os.path.expanduser('~')
+FILES = ['tools/dmsh_chain.py', 'tools/own_compilers.py', 'tools/dmsh_build.py', 'tools/dmsh_atomic.py', 'tools/dmsh_fetch.py', 'tools/dmsh_vin.py', 'tools/dmsh_pull.py', 'tools/dmsh_pull.metal', 'tools/dmsh_geometry.py', 'tools/dmsh_facts.py', 'tools/dmsh_xlate/Program.cs', 'tools/dmsh_xlate/dmsh_xlate.csproj', '../ios/tools/ios_metal.py', 'tools/dmsh_chain.lock']
 # This target-specific lowering lives in the vendored translator. Include its
 # sources as well as the rebuilt DLL fingerprint; no old shader cache can bypass it.
 FILES += ['../third_party/ryujinx/src/Ryujinx.Graphics.Shader/' + f for f in (
@@ -23,11 +25,18 @@ FILES += ['../third_party/ryujinx/src/Ryujinx.Graphics.Shader/' + f for f in (
     'Translation/TranslationFlags.cs', 'Translation/HostCapabilities.cs',
     'Translation/TranslatorContext.cs', 'Translation/EmitterContext.cs', 'Translation/ShaderDefinitions.cs', 'CodeGen/Spirv/Instructions.cs',
     'StructuredIr/ShaderProperties.cs', 'Translation/Optimizations/BindlessElimination.cs')]
+# Every .NET source, project, resource and locked package participates, including
+# Common and Spv.Generator; changing any of them invalidates old shader caches.
+FILES = sorted(set(FILES + [os.path.relpath(p, GFX) for p in build_dotnet_tools.source_files()]))
 INPUT_TABLES = ['shader_facts.tsv', 'shader_map.tsv', 'shader_map.tsv.conflicts.tsv', 'shader_pairs.tsv', 'bf_want.tsv']   # in the game profile folder
-LOCK = os.path.join(HERE, 'dmsh_chain.lock'); HEADER = os.path.join(GFX, 'nvn/dmsh_chain.h')
+LOCK = os.path.join(HERE, 'dmsh_chain.lock')
+# Read source inputs through their real paths, but write the header into the
+# invoking checkout (also used by fixtures that link a shared tools directory).
+HEADER = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../nvn/dmsh_chain.h'))
 STAMP = 'inputs.tsv'   # in the library directory b-<V>/
-# the translator defaults to the in-repo build that matches the lock file (a rebuilt dll has different fingerprints)
-XLATE_DIR = os.path.dirname(os.environ.get('XLATE', os.path.join(HERE, 'dmsh_xlate_bin/dmsh_xlate')))
+# Never fall back to the historical binaries. Check all artifact hashes before
+# executing even --source-sha, since that is already execution of managed code.
+XLATE_DIR = str(build_dotnet_tools.OUTPUT / 'dmsh_xlate')
 
 def options():
     return 'debug=%s reduced=%s' % (os.environ.get('XLATE_DEBUG', '1') != '0', os.environ.get('XLATE_REDUCED', '1') == '1')
@@ -71,14 +80,18 @@ def sha16(p): return hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]
 
 def tools_now():
     """Actual tool fingerprints: translator dll (including the Ryujinx shader library), spirv-cross, metal compiler (macOS / iOS)"""
+    build_dotnet_tools.verify_tool('dmsh_xlate', os.environ.get('XLATE'))
     t = {}
     for dll in ('dmsh_xlate.dll', 'Ryujinx.Graphics.Shader.dll', 'Ryujinx.Common.dll'): t[dll] = sha16(os.path.join(XLATE_DIR, dll))
-    t['xlate_source'] = subprocess.run([os.path.join(XLATE_DIR, 'dmsh_xlate'), '--source-sha'], capture_output=True, text=True).stdout.strip()
+    t['xlate_source'] = subprocess.run([os.path.join(XLATE_DIR, 'dmsh_xlate'), '--source-sha'], capture_output=True, text=True, check=True).stdout.strip()
+    t['dotnet_inputs'] = build_dotnet_tools.source_digest()
     sc = subprocess.run(['which', 'spirv-cross'], capture_output=True, text=True).stdout.strip()
-    t['spirv-cross'] = sha16(sc) if sc else 'missing'
+    if not sc: raise RuntimeError('spirv-cross is missing; install the official tool before checking or updating fingerprints')
+    t['spirv-cross'] = sha16(sc)
     for sdk in ('macosx', 'iphoneos'):
-        t['metal_' + sdk] = subprocess.run(['xcrun', '-sdk', sdk, 'metal', '--version'], capture_output=True, text=True).stdout.splitlines()[0:1] or ['missing']
-        t['metal_' + sdk] = t['metal_' + sdk][0]
+        result = subprocess.run(['xcrun', '-sdk', sdk, 'metal', '--version'], capture_output=True, text=True, check=True)
+        if not result.stdout.strip(): raise RuntimeError('Metal compiler did not report its version')
+        t['metal_' + sdk] = result.stdout.splitlines()[0]
     return t
 
 def xlate_source_sha():   # same convention as dmsh_xlate --source-sha: the embedded Program.cs and csproj concatenated in that order
@@ -86,7 +99,9 @@ def xlate_source_sha():   # same convention as dmsh_xlate --source-sha: the embe
 
 def check_tools():
     want = dict(l.rstrip('\n').split('\t', 1) for l in open(LOCK) if '\t' in l and not l.startswith('#'))
-    now = tools_now(); bad = [f'{k}: lock {want.get(k)} / actual {v}' for k, v in now.items() if want.get(k) != v]
+    try: now = tools_now()
+    except (RuntimeError, OSError, subprocess.SubprocessError) as e: return [str(e)]
+    bad = [f'{k}: lock {want.get(k)} / actual {v}' for k, v in now.items() if want.get(k) != v]
     if now['xlate_source'] != xlate_source_sha(): bad.append(f'the translator was not built from the in-repo source: embedded source {now["xlate_source"]} / in repo {xlate_source_sha()} (rebuild dmsh_xlate)')
     return bad
 

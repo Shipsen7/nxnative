@@ -24,8 +24,7 @@
 #   The chain version header dm/gfx/nvn/dmsh_chain.h (one version for every game) is written again when a chain change was committed without it (chain_header: it follows from the source alone),
 #   so a run may leave it changed. The c1 / uniform extent tables (c1_full.tsv, cb_extent.tsv) are not in the repository: the iOS shader step's dmsh_build.py makes them in the profile folder from
 #   this build's shaders, where git ignores them, and a reused step makes them again when they do not name its libraries' stamp (chain_tables).
-# The shader translator is the in-repo dm/gfx/tools/dmsh_xlate_bin (the build whose fingerprints match dmsh_chain.lock; a rebuilt dll has different fingerprints and dmsh_build refuses it; its launcher is universal, so an Intel Mac runs it too). The Metal compiler and spirv-cross may be other than the lock's: the iOS shaders
-#   are built through dm/gfx/tools/own_compilers.py, which says so in one line and leaves the lock and the chain version as they are.
+# The shader translator is built locally under .tools/dotnet (scripts/build_dotnet_tools.py); verified artifacts must match dmsh_chain.lock. All compiler fingerprints must match the validated lock; compiler changes require validation and cache invalidation.
 # The Python running this file needs lz4, capstone and fonttools (and backports.zstd before Python 3.14); also needed: Xcode, xcodegen, .NET SDK 10, zstd, spirv-cross. A first run takes 2 (Metroid Dread) to 10 minutes (Breath of the Wild: 5 of them the shader split), longer when shader libraries must be compiled; a repeat run with unchanged inputs takes about 20 s (Metroid Dread), mostly packing the IPA. Key values are never printed.
 # The console shows one line per stage ([k/n] stage, with a bar, done/total, percent, elapsed time and ETA where the work can be counted); the tools' own output goes only to logs/ (PROGRESS / --progress). --progress json writes newline-delimited JSON events to stdout.
 import ast, collections, ctypes, getpass, hashlib, importlib.util, json, os, re, shlex, shutil, struct, subprocess, sys, tempfile, threading, time, types, zlib
@@ -359,14 +358,11 @@ def rmtree(p):
 
 
 def build_nx_extract(repo, work, logs, env):
-    """Build nx_extract into <work>/tools/nx_extract/. It is built in a temporary folder and copied over: with an apostrophe in the output path (e.g. "Bowser's Fury") MSBuild's conditions break,
-    LibHac.dll and the executable are not copied, and the build still reports success"""
-    nx = work / 'tools/nx_extract/nx_extract'
-    with tempfile.TemporaryDirectory(prefix='nx_extract_') as t:
-        run(['dotnet', 'build', repo / 'dm/tools/nx_extract', '-c', 'Release', '-o', t, '-v', 'quiet', '-nologo'], logs / 'nx_extract_build.log', env=env)
-        if not (Path(t) / 'nx_extract').exists(): raise BuildError(f'nx_extract built without an executable (see {logs / "nx_extract_build.log"})')
-        rmtree(nx.parent); shutil.copytree(t, nx.parent)
-    return nx
+    """Use only the verified source build; no network restore during game processing."""
+    sys.path.insert(0, str(repo / 'scripts'))
+    import build_dotnet_tools
+    try: return build_dotnet_tools.verify_tool('nx_extract')
+    except RuntimeError as e: raise BuildError(str(e)) from e
 
 
 def swap_in(tmp, dst):   # swap the new output in as a whole (the old one is untouched on failure)
@@ -1801,6 +1797,8 @@ def main(args=None):
     if args.xcode_workspace and not prepare_xcode: raise BuildError('--xcode-workspace requires --prepare-xcode')
     nsp_dir = Path(os.path.expanduser(args.nsp_dir or NSP_DIR or ask('NSP folder: ', 'the NSP folder'))).resolve()
     keys = Path(os.path.expanduser(args.keys or PROD_KEYS or ask('path of prod.keys: ', 'prod.keys (-k)'))).resolve()
+    if any(p == repo.resolve() or repo.resolve() in p.parents for p in (nsp_dir, keys)):
+        raise BuildError('Keep game folders and keys outside the repository (including symlink targets)')
     if not nsp_dir.is_dir(): raise BuildError(f'not a folder: {nsp_dir}')
     if not keys.is_file(): raise BuildError(f'no such file: {keys}')
     sys.path.insert(0, str(repo / 'dm/games')); import game as gamemod   # game profiles
@@ -1876,7 +1874,11 @@ def main(args=None):
         except ValueError as e: raise BuildError(str(e)) from e
     say('Mac app: the Mac shaders and the Mac host, packed into a Mac app; no iOS shaders, Xcode project or IPA' if mac_pack else 'Mac-only build for development: the Mac shaders and the Mac host, no iOS shaders, Xcode project or IPA' if mac else f'Xcode project: {project}' if prepare_xcode else f'output IPA: {out_ipa}')
     say(f'work folder (extracted game files in extract/, {"kept for the next build" if keep else "deleted after the IPA is built"}): {work}')
-    xlate = repo / 'dm/gfx/tools/dmsh_xlate_bin/dmsh_xlate'
+    xlate = repo / '.tools/dotnet/dmsh_xlate/dmsh_xlate'
+    sys.path.insert(0, str(repo / 'scripts'))
+    import build_dotnet_tools
+    try: build_dotnet_tools.verify_tool('dmsh_xlate', xlate)
+    except RuntimeError as e: raise BuildError(str(e)) from e
     # DM_GAME picks the profile; DM_ROOT / WORK point at <id>_build: the tools' default paths and temporary directories all stay inside it
     env.update(DM_GAME=g.id, DM_ROOT=str(work), WORK=str(work / 'tmp'))
     logs = work / 'logs'

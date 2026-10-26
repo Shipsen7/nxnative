@@ -270,7 +270,7 @@ To add a game:
 
 ## Build by hand (Mac)
 
-`scripts/build_ipa_from_nsp.py --platform mac` does steps 1 to 4 in the game's NSP folder and prints the command of step 5 ([A Mac-only build for development](#a-mac-only-build-for-development)). The steps by hand follow. You need the same tools as the script. The shader translator is the prebuilt `dm/gfx/tools/dmsh_xlate_bin`, the build that matches `dmsh_chain.lock`; a fresh `dotnet publish` gives different fingerprints. Its launcher `dmsh_xlate` is a universal binary (arm64 and x86_64), so an Intel Mac runs it too, with the same output; after a rebuild, join the new launcher with lipo to the one `dotnet build -r osx-x64` makes of the same .NET version (the lock does not cover the launcher). What an Intel Mac cannot run is the Mac host, which runs the game's own arm64 code: the NSP script stops at a step that boots the game there (a run-time shader capture, a decode with the game's own Oodle or LZ5) and skips a provisional profile's heap check. The commands use three variables:
+`scripts/build_ipa_from_nsp.py --platform mac` does steps 1 to 4 in the game's NSP folder and prints the command of step 5 ([A Mac-only build for development](#a-mac-only-build-for-development)). The steps by hand follow. You need the same tools as the script. Build the shader translator and extractor from reviewed source with `python3 scripts/build_dotnet_tools.py --restore`, then `python3 scripts/build_dotnet_tools.py`. See [the .NET build guide](dotnet-build.md) for prerequisites and validation. Only the verified local tools under `.tools/dotnet` are accepted, including strict Metal and SPIRV-Cross fingerprints. The Mac host requires Apple silicon. The commands use three variables:
 - `G`, the profile;
 - `W`, the game's work folder: `<title ID>-work` inside the game's NSP folder, outside this repository and off the home folder (it grows to the size of the game files);
 - `VER`, a version folder named after the NSP version.
@@ -278,9 +278,9 @@ To add a game:
 ```
 G=010015100B514000; W="<NSP folder>/$G-work"; VER=v327680
 # 1. extract: the base game alone (update -), or an update layered over it (the last argument lets unchanged files become clones)
-dotnet build dm/tools/nx_extract -c Release -o $W/build/nx_extract
-$W/build/nx_extract/nx_extract <prod.keys> <base NSP> - $W/data/v0
-$W/build/nx_extract/nx_extract <prod.keys> <base NSP> <update NSP> $W/data/$VER $W/data/v0/RomFS
+python3 scripts/build_dotnet_tools.py --verify
+.tools/dotnet/nx_extract/nx_extract <prod.keys> <base NSP> - $W/data/v0
+.tools/dotnet/nx_extract/nx_extract <prod.keys> <base NSP> <update NSP> $W/data/$VER $W/data/v0/RomFS
 # 2. rewrite the profile's code modules
 for m in $(python3 dm/games/game.py $G modules); do python3 dm/tools/patch_nso.py $W/data/$VER/ExeFS/$m $W/build/patched_$VER $m; done
 # 3. shaders: extract from every version in the profile's shader_versions (comma-separated, base first), then translate into <cache>/b-<chain version>/

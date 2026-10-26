@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "ryujinx.common": {
+        "type": "Project"
+      },
+      "ryujinx.graphics.shader": {
+        "type": "Project",
+        "dependencies": {
+          "Ryujinx.Common": "[1.0.0, )",
+          "Spv.Generator": "[1.0.0, )"
+        }
+      },
+      "spv.generator": {
+        "type": "Project"
+      }
+    }
+  }
+}

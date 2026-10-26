@@ -4,6 +4,14 @@ Play your own Nintendo Switch games natively on iPhone and iPad. Bring your game
 
 It is not an emulator: the game's own code runs directly on the Apple chip, with Switch graphics rebuilt on Metal. Nothing from any game is in this repository, and the project is not affiliated with Nintendo or any game publisher.
 
+## Local source build and privacy setup
+
+This public fork adds local source builds, artifact verification and privacy safeguards. Personal use does not require a private GitHub repository: game files, keys, saves and local diagnostics stay outside version control.
+
+Start with the [local .NET build guide](docs/dotnet-build.md). It covers official prerequisites, locked package restore, source builds, synthetic shader checks, the unsigned iOS smoke build and preparing your own Xcode project. The bundled translator binaries have been removed: builds accept only verified local outputs under `.tools/dotnet`. See [dependency provenance](DEPENDENCIES.md), the [security audit](SECURITY_AUDIT.md) and [validation results](docs/security/test-results.md).
+
+Keep dumps, extraction outputs, `prod.keys`, signing material and private settings outside this repository. Enable the local hooks with `git config core.hooksPath .githooks`; before any upload run `python3 scripts/repository_guard.py --history`. iOS diagnostic files are opt-in through `DM_DIAGNOSTICS=1` in Documents/env.txt; normal runs discard persistent logs. Saves remain local, exportable and eligible for your configured backups.
+
 ## Acknowledgements
 
 This project is built on other people's work:

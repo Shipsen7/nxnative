@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode>true</RestoreLockedMode>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <Deterministic>true</Deterministic>
+    <!-- Explicit PathMap in the builder is stable across paths and Git state.
+         Do not embed owner remote URLs, revisions or untracked local sources. -->
+    <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+    <EnableSourceLink>false</EnableSourceLink>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904;NU1905</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

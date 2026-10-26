@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-26",
+  "method": "Source copy at another path, separate locked restore, publish with outgoing IP denied; same Mac and SDK. Every published artifact hash compared, excluding local manifest. Git/source-link metadata disabled to avoid path and revision dependence.",
+  "results": {
+    "dmsh_xlate": {
+      "identical": true,
+      "files": 8,
+      "differences": []
+    },
+    "nx_extract": {
+      "identical": true,
+      "files": 6,
+      "differences": []
+    }
+  }
+}

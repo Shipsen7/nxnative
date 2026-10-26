@@ -1,0 +1,6 @@
+{
+  "test": "Missing synthetic key file path must not appear in parser output",
+  "exit": 2,
+  "path_leaked": false,
+  "result": "passed"
+}

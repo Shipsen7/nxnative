@@ -33,7 +33,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         UILaunchStoryboardName: ""
-        UIFileSharingEnabled: true          # Documents (log.txt, saves) visible in the Files app
+        UIFileSharingEnabled: true          # Local saves and opt-in diagnostics remain exportable through Files
         LSSupportsOpeningDocumentsInPlace: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationLandscapeRight

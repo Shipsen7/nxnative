@@ -11,6 +11,29 @@
 #include <mach/mach.h>
 #include <stdatomic.h>
 #include <time.h>
+#if TARGET_OS_OSX
+#include <spawn.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <errno.h>
+extern char **environ;
+
+static int watch_sample(const char *path) {
+    char pid_text[32]; snprintf(pid_text, sizeof pid_text, "%d", (int)getpid());
+    char *args[] = {"/usr/bin/sample", pid_text, "1", "-f", (char *)path, NULL};
+    posix_spawn_file_actions_t actions;
+    if (posix_spawn_file_actions_init(&actions)) return -1;
+    int err = posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
+    if (!err) err = posix_spawn_file_actions_addopen(&actions, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
+    pid_t child;
+    if (!err) err = posix_spawn(&child, args[0], &actions, NULL, args, environ);
+    posix_spawn_file_actions_destroy(&actions);
+    if (err) return -1;
+    int status; pid_t waited;
+    do { waited = waitpid(child, &status, 0); } while (waited < 0 && errno == EINTR);
+    return waited < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0 ? -1 : 0;
+}
+#endif
 
 static _Atomic uint64_t g_watch_last_ns;
 static _Atomic uint64_t g_watch_count;
@@ -61,7 +84,8 @@ static void *watchdog_main(void *arg) {
             if (g_wait_dump) g_wait_dump();   // State of all blocking wait points on the graphics side (registered when nvn_mtl.m initializes)
 #if TARGET_OS_OSX
             { const char *d = getenv("DM_WATCH_SAMPLE");   // Mac diagnostics: when stuck, sample itself for 1 second and write the thread stacks to this path
-              if (d) { char c[1200]; snprintf(c, sizeof c, "/usr/bin/sample %d 1 -f '%s' >/dev/null 2>&1", (int)getpid(), d); if (system(c)) LOG("watchdog: sampling failed"); else LOG("watchdog: thread stacks written to %s", d); } }
+              // Pass the diagnostic path as one argument; never interpolate it into a shell command.
+              if (d) { if (watch_sample(d)) LOG("watchdog: sampling failed"); else LOG("watchdog: thread stacks written"); } }
 #endif
             _exit(128 + SIGALRM);
         }

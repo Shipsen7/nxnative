@@ -66,7 +66,7 @@ static void env_file(const char *path) {   // KEY=VALUE lines, # starts a commen
         char *eq = strchr(s, '=');
         if (*s == '#' || !eq || eq == s) continue;
         *eq = 0; char *k = s; for (char *t = eq - 1; t > k && (*t == ' ' || *t == '\t'); t--) *t = 0;
-        if (!getenv(k)) { setenv(k, eq + 1, 0); fprintf(stderr, "launcher: env %s=%s (%s)\n", k, eq + 1, path); }
+        if (!getenv(k)) setenv(k, eq + 1, 0);   // Never persist private settings or paths in the log.
     }
     fclose(f);
 }

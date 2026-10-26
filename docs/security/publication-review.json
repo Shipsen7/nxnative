@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-26",
+  "approved_destination": "Shipsen7/nxnative",
+  "visibility": "public",
+  "publication_branch": "codex/security-source-build",
+  "public_git_identity": "GitHub handle and noreply identity; no personal name or private email",
+  "earlier_local_commit_excluded_from_outgoing_ancestry": true,
+  "metadata_review": "Tracked tree, outgoing blobs, commit authors/committers and message checked for workstation paths and private personal identifiers; no matches.",
+  "secret_history_guard": "Passed; 10646 reachable/indexed objects inspected before final documentation update; repeated by pre-push hook.",
+  "gitleaks_version": "8.30.1",
+  "gitleaks_outgoing_commit_findings": 0,
+  "gitleaks_complete_tree_raw_findings": 5,
+  "gitleaks_complete_tree_review": [
+    {
+      "file": "dm/gfx/nvn/rt_range_check.inc",
+      "line": 15,
+      "rule": "generic-api-key",
+      "unchanged_from_public_upstream": true,
+      "classification": "false positive after source review",
+      "reason": "Shader/cache identifier used by graphics code or a synthetic graphics test; not an authentication credential."
+    },
+    {
+      "file": "dm/gfx/tests/t_feedback.m",
+      "line": 95,
+      "rule": "generic-api-key",
+      "unchanged_from_public_upstream": true,
+      "classification": "false positive after source review",
+      "reason": "Shader/cache identifier used by graphics code or a synthetic graphics test; not an authentication credential."
+    },
+    {
+      "file": "dm/gfx/tests/test_tbdr_budget.py",
+      "line": 35,
+      "rule": "generic-api-key",
+      "unchanged_from_public_upstream": true,
+      "classification": "false positive after source review",
+      "reason": "Shader/cache identifier used by graphics code or a synthetic graphics test; not an authentication credential."
+    },
+    {
+      "file": "dm/gfx/tests/t_geometry.m",
+      "line": 333,
+      "rule": "generic-api-key",
+      "unchanged_from_public_upstream": true,
+      "classification": "false positive after source review",
+      "reason": "Shader/cache identifier used by graphics code or a synthetic graphics test; not an authentication credential."
+    },
+    {
+      "file": "dm/host/hle_oodle.c",
+      "line": 77,
+      "rule": "generic-api-key",
+      "unchanged_from_public_upstream": true,
+      "classification": "false positive after source review",
+      "reason": "Narrative comment describing the streaming decoder API and code addresses; not a credential."
+    }
+  ],
+  "new_tests": {
+    "security_guard": 7,
+    "documentation": 4,
+    "failed": 0
+  },
+  "dotnet_manifest_and_shader_fingerprints": "passed; unchanged build inputs",
+  "excluded_local_artifacts": [
+    "dependency caches",
+    "build outputs",
+    "unsigned synthetic IPA",
+    "test logs",
+    "original local commit reflog"
+  ],
+  "limitations": "Pattern and metadata checks are defense in depth; upstream author/license attribution is intentionally preserved."
+}
