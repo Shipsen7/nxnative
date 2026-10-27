@@ -18,6 +18,13 @@ No `patches.py`.
 
 - On the Mac: 30 fps as on the Switch (frame time p50 33.3 ms, p95 34–35 ms in the house and outside in Postwick), no red line in 10 minutes from a fresh save.
 
+## Current fork validation (2026-10-27)
+
+- Current: the source-built fork was signed and installed on a physical iPhone Duo running iOS 27.2, with the Increased Memory Limit entitlement. All 41,516 iOS shaders built successfully with chain `ee93a40c81af`.
+- Fresh boot reached the language selection with visible game output at 30 fps. The initial log through frame 5,700 had no `[RED]` messages; its last timing sample was p50 33.33 ms / p95 35.78 ms. Audio callbacks reported no underruns, and the user confirmed working touch controls and audible sound. The initial report of silence was resolved without a host or profile change; its device-side cause was not established.
+- Saving and loading on the installed iPhone Duo build were subsequently confirmed by the user.
+- Open: extended gameplay and fold/orientation transitions were not validated in this fork run. The Mac routes below describe the earlier upstream testing.
+
 ## Mac routes
 
 - The work folder's `run/boot.sh`, `run/ctl.sh` and `run/step.sh` are Sword's, run headless as there; `run/mash.sh <prefix> <rounds>` presses A ten times a round and takes a screenshot after each.
