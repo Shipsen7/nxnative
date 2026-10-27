@@ -23,7 +23,8 @@ No `patches.py`.
 - Current: the source-built fork was signed and installed on a physical iPhone Duo running iOS 27.2, with the Increased Memory Limit entitlement. All 41,516 iOS shaders built successfully with chain `ee93a40c81af`.
 - Fresh boot reached the language selection with visible game output at 30 fps. The initial log through frame 5,700 had no `[RED]` messages; its last timing sample was p50 33.33 ms / p95 35.78 ms. Audio callbacks reported no underruns, and the user confirmed working touch controls and audible sound. The initial report of silence was resolved without a host or profile change; its device-side cause was not established.
 - Saving and loading on the installed iPhone Duo build were subsequently confirmed by the user.
-- Open: extended gameplay and fold/orientation transitions were not validated in this fork run. The Mac routes below describe the earlier upstream testing.
+- The user also confirmed that the game works in all rotation directions and while the iPhone Duo is folded closed in landscape orientation.
+- Open: extended gameplay was not validated in this fork run. The Mac routes below describe the earlier upstream testing.
 
 ## Mac routes
 
