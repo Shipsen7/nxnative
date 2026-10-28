@@ -12,6 +12,8 @@ Start with the [local .NET build guide](docs/dotnet-build.md). It covers officia
 
 Keep dumps, extraction outputs, `prod.keys`, signing material and private settings outside this repository. Enable the local hooks with `git config core.hooksPath .githooks`; before any upload run `python3 scripts/repository_guard.py --history`. iOS diagnostic files are opt-in through `DM_DIAGNOSTICS=1` in Documents/env.txt; normal runs discard persistent logs. Saves remain local, exportable and eligible for your configured backups.
 
+For a graphical local workflow, see [NX Port Studio Local](macOS/NXPortStudio/README.md): build progress, Mac/unsigned IPA export and Xcode workspace preparation using this checkout's verified tools.
+
 ## Acknowledgements
 
 This project is built on other people's work:

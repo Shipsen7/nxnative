@@ -26,6 +26,10 @@ No `patches.py`.
 - The user also confirmed that the game works in all rotation directions and while the iPhone Duo is folded closed in landscape orientation.
 - Open: extended gameplay was not validated in this fork run. The Mac routes below describe the earlier upstream testing.
 
+## Found on this game
+
+- Local unsigned-export validation found absolute build paths in N_OSO debug metadata. See [Unsigned exports contain local build paths in debug metadata](../../../docs/reference/packing.md#unsigned-exports-contain-local-build-paths-in-debug-metadata) for the cause, export-only removal and validation scope.
+
 ## Mac routes
 
 - The work folder's `run/boot.sh`, `run/ctl.sh` and `run/step.sh` are Sword's, run headless as there; `run/mash.sh <prefix> <rounds>` presses A ten times a round and takes a screenshot after each.

@@ -5,5 +5,5 @@ Ryujinx.Common.dll	bf5697e6722e8eaf
 xlate_source	7c5bb25142d9eb33
 dotnet_inputs	401720ec17f340468b64c4524483540980d11221e066a3759acd6a84c2a9c7c2
 spirv-cross	d9dc197f061b42a5
-metal_macosx	Apple metal version 32023.921 (metalfe-32023.921.6)
-metal_iphoneos	Apple metal version 32023.921 (metalfe-32023.921.6)
+metal_macosx	Apple metal version 32023.922 (metalfe-32023.922.4)
+metal_iphoneos	Apple metal version 32023.922 (metalfe-32023.922.4)
