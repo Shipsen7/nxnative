@@ -267,7 +267,7 @@ struct StudioView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(model.isBusy ? model.buildProgress.stages.last?.name ?? model.status : model.status).fontWeight(.medium)
                     HStack(spacing: 14) {
-                        if model.buildProgress.stageTotal > 0 { Text("Stage \(model.buildProgress.stages.count) / \(model.buildProgress.stageTotal)") }
+                        if model.buildProgress.stageTotal > 0 { Text("Stage \(model.buildProgress.stageIndex) / \(model.buildProgress.stageTotal)") }
                         if let elapsed = model.buildProgress.elapsed { Text("Elapsed " + duration(elapsed)) }
                         if let eta = model.buildProgress.eta { Text("Remaining ~" + duration(eta)) }
                         if let fraction = model.buildProgress.fraction { Text("\(Int(fraction * 100))% of stage") }

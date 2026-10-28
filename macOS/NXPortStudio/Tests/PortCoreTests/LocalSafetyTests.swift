@@ -81,6 +81,33 @@ final class LocalSafetyTests: XCTestCase {
         XCTAssertEqual(result.exitCode, 0, result.output)
     }
 
+    func testStageCounterRestartsReplaceTheDisplayedPlan() throws {
+        var state = BuildProgress()
+        for name in ["decompress NSZ", "survey", "build nx_extract"] {
+            state.receive(try XCTUnwrap(ProgressEvent.decode(line: "{\"ev\":\"stage\",\"k\":1,\"n\":3,\"name\":\"\(name)\"}")))
+            XCTAssertEqual(state.stages.count, 1)
+            XCTAssertEqual(state.stages.map(\.id), [1])
+            XCTAssertEqual(state.stages.first?.name, name)
+            XCTAssertEqual(state.stageIndex, 1)
+            XCTAssertEqual(state.stageTotal, 3)
+            XCTAssertNil(state.fraction)
+            state.receive(try XCTUnwrap(ProgressEvent.decode(line: #"{"ev":"stage_end","ok":true}"#)))
+        }
+        state.receive(try XCTUnwrap(ProgressEvent.decode(line: #"{"ev":"stage","k":2,"n":3,"name":"extract"}"#)))
+        XCTAssertEqual(state.stages.map(\.id), [1, 2])
+        XCTAssertEqual(state.stageIndex, 2)
+    }
+
+    func testDisplayedStageCounterUsesThePipelineIndex() throws {
+        var state = BuildProgress()
+        for index in [1, 3] {
+            state.receive(try XCTUnwrap(ProgressEvent.decode(line: "{\"ev\":\"stage\",\"k\":\(index),\"n\":5}")))
+        }
+        XCTAssertEqual(state.stages.map(\.id), [1, 3])
+        XCTAssertEqual(state.stageIndex, 3)
+        XCTAssertEqual(state.stageTotal, 5)
+    }
+
     func testProcessTimeoutStopsHungCheck() async throws {
         let runner = ProcessRunner()
         let start = ContinuousClock.now

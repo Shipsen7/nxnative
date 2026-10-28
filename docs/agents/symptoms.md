@@ -4,6 +4,8 @@ One line per symptom in the [subsystem references](../reference/): what you see 
 
 ## Packing
 
+- decompression or a provisional survey is followed by duplicate stage identities or a footer counter larger than the current plan's total. → [GUI stage rows repeat after the pipeline starts a new plan](../reference/packing.md#gui-stage-rows-repeat-after-the-pipeline-starts-a-new-plan)
+- the iOS compiler reports `SwiftUIMacros.StateMacro` unavailable or a malformed plugin response, preceded by `sandbox_apply: Operation not permitted`. → [Direct GUI iOS builds cannot start the SwiftUI State macro](../reference/packing.md#direct-gui-ios-builds-cannot-start-the-swiftui-state-macro)
 - the first extraction stops with `nx_extract exit code 131` and `.NET location: Not found`, even though `dotnet` is on `PATH`. The shader translator can fail the same way. → [Homebrew .NET is on PATH but apphosts cannot find the runtime](../reference/packing.md#homebrew-net-is-on-path-but-apphosts-cannot-find-the-runtime)
 - an unsigned IPA's Mach-O executable contains the builder's absolute source and object-file paths, including the local home directory. → [Unsigned exports contain local build paths in debug metadata](../reference/packing.md#unsigned-exports-contain-local-build-paths-in-debug-metadata)
 - packing succeeds, but `unzip -t` or Python's `ZipFile.testzip()` reports a bad CRC for a large deflated file. → [A streamed file changes size and the IPA fails its CRC check](../reference/packing.md#a-streamed-file-changes-size-and-the-ipa-fails-its-crc-check)

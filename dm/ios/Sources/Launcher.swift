@@ -67,7 +67,15 @@ private struct SettingRow: View {
 private struct LauncherView: View {
     @ObservedObject var m: LauncherModel
     let play: () -> Void
-    @State private var memory = os_proc_available_memory()
+    // The SDK's @State macro launches a separately sandboxed plugin, which cannot
+    // start inside the GUI's outbound-IP restriction. Use the same public State
+    // DynamicProperty storage directly, keeping its nonmutating updates and the
+    // network restriction without disabling the compiler's plugin sandbox.
+    private var memoryState = State<Int>(initialValue: os_proc_available_memory())
+    private var memory: Int {
+        get { memoryState.wrappedValue }
+        nonmutating set { memoryState.wrappedValue = newValue }
+    }
 
     var body: some View {
         GeometryReader { geometry in

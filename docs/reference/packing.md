@@ -2,6 +2,20 @@
 
 ## Build tools
 
+### GUI stage rows repeat after the pipeline starts a new plan
+
+- **Symptom:** decompression or a provisional survey is followed by duplicate stage identities or a footer counter larger than the current plan's total.
+- **Cause:** `PROG.plan` restarts the script's stage counter, while the GUI previously appended every plan to one list keyed by that counter and displayed the history length.
+- **Fix:** `BuildProgress` replaces the displayed plan when the counter restarts and stores the current pipeline index separately. The footer uses that index; the row identities remain unique. Regression tests exercise repeated plan restarts and a skipped stage event.
+- **Found on:** synthetic decompression/survey event sequences during the local GUI PR review; no game files required.
+
+### Direct GUI iOS builds cannot start the SwiftUI State macro
+
+- **Symptom:** the iOS compiler reports `SwiftUIMacros.StateMacro` unavailable or a malformed plugin response, preceded by `sandbox_apply: Operation not permitted`.
+- **Cause:** the current SDK resolves `@State` to an external macro. Its compiler plugin tries to enter a second process sandbox inside the GUI's outbound-IP restriction; macOS rejects that nesting.
+- **Fix:** the launcher's memory display uses the public `State<Int>` DynamicProperty storage and its nonmutating wrapped-value accessor directly. State updates and the existing memory refresh are preserved without launching that macro. Neither the outbound-IP restriction nor the compiler's plugin sandbox is disabled. A regression typechecks the production launcher under the same network policy, and the complete synthetic iOS app build checks Swift compilation/linking and resource staging.
+- **Found on:** the synthetic production iOS build under the GUI's network policy, Xcode 27.2, during the local GUI PR review. The Xcode project preparation route itself had already passed user testing.
+
 ### Homebrew .NET is on PATH but apphosts cannot find the runtime
 
 - **Symptom:** the first extraction stops with `nx_extract exit code 131` and `.NET location: Not found`, even though `dotnet` is on `PATH`. The shader translator can fail the same way.

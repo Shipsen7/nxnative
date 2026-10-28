@@ -3,8 +3,9 @@
 Initial checks: 2026-10-27. User acceptance recorded: 2026-10-28, for a test
 performed on 2026-10-27. Scope: the local GUI branch, based on the existing
 hardened checkout at `9e42473`, with a tested Metal compiler fingerprint update
-and unsigned-export debug-metadata cleanup. Game runtime code, profiles and
-signing entitlements were not changed by this GUI work.
+and unsigned-export debug-metadata cleanup. Game guest code, profiles and
+signing entitlements were not changed. The pre-merge review also adapts the
+host launcher's State declaration for the protected direct-build route.
 
 ## Imported source
 
@@ -114,6 +115,31 @@ in that game's note.
 The subprocess restriction is not a whole-system traffic audit or a filesystem
 sandbox. There is no claim that arbitrary source checkouts or engine-generated
 diagnostics are safe to share. Selected files and raw engine logs remain local.
+
+## Pre-merge review (2026-10-28)
+
+- Fixed the reviewed GUI stage-counter restart defect: a new pipeline plan
+  replaces the displayed stage rows, and the footer uses the pipeline's current
+  index. Two Swift regressions cover repeated restarts and skipped events.
+- The additional protected iOS smoke build exposed a real SDK macro failure:
+  the external State macro's nested sandbox could not start. The launcher's
+  memory display now uses the same public State DynamicProperty directly.
+  The production launcher typechecks under the unchanged network policy, and
+  a complete unsigned synthetic iOS app builds and stages its resources there.
+  No compiler sandbox or network restriction was disabled. Causes and fixes:
+  [packing/build references](../reference/packing.md#build-tools).
+- The updated GUI suite passes 25 tests; 60 Python tests covering security,
+  progress, chain integrity, archives, Xcode preparation, the offline launcher
+  and documentation pass. The optimized GUI Release build also succeeds.
+  The Metal/GPU suites pass all 22 methods with native geometry enabled and
+  no skips. The additional iOS build is a synthetic compile/link check, not
+  another physical-device test. Debug-only stripping of that synthetic
+  executable preserves all 54 populated sections and removes the home path.
+- The user's Shining Pearl running-game confirmation above applies to the
+  earlier GUI revision. No new signed build or device installation was
+  performed for these review fixes.
+- GitHub reported no CI check runs or status contexts for this PR revision;
+  the validation here is local. The fork's workflows remain manual/disabled.
 
 ## Reproduce
 

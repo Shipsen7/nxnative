@@ -16,11 +16,17 @@ public struct BuildProgress: Sendable {
     public private(set) var total: Double?
     public private(set) var unit = ""
     public private(set) var estimated = false
+    public private(set) var stageIndex = 0
     public private(set) var stageTotal = 0
     public init() {}
     public mutating func receive(_ event: ProgressEvent) {
         if event.ev == "stage" {
-            stages.append(BuildStage(id: event.k ?? stages.count + 1, name: event.name ?? "Preparing", finished: nil))
+            let index = event.k ?? stageIndex + 1
+            // The pipeline replans after decompression or a provisional survey.
+            // Its counter restarts; show the new plan without duplicate row IDs.
+            if index <= stageIndex { stages.removeAll(keepingCapacity: true) }
+            stageIndex = index
+            stages.append(BuildStage(id: index, name: event.name ?? "Preparing", finished: nil))
             stageTotal = event.n ?? stageTotal
             step = event.step ?? ""; fraction = nil; elapsed = nil; eta = nil; done = nil; total = nil
             unit = ""; estimated = false
