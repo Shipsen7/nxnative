@@ -11,6 +11,13 @@
 
 ## IPA archives
 
+### Unsigned exports contain local build paths in debug metadata
+
+- **Symptom:** an unsigned IPA's Mach-O executable contains the builder's absolute source and object-file paths, including the local home directory.
+- **Cause:** Release builds using `DEBUG_INFORMATION_FORMAT = dwarf` retain N_OSO debug-map entries in the linked executable; packaging the app also packages those entries.
+- **Fix:** after the unsigned app build, `build_ipa.sh` runs `xcrun strip -S` before packing. This removes debugging symbols while preserving runtime symbols and populated code/data sections. The `--prepare-xcode` route exits before this step, preserving Xcode development/debugging products. On a copy of the affected executable, all 60 populated Mach-O sections remained byte-identical and the home path disappeared. The original IPA was preserved.
+- **Found on:** [Pokemon Shield](../../dm/games/01008DB008C2C000/README.md), local GUI/export privacy validation. Applies to unsigned exports generally; device runtime validation remains separate.
+
 ### A streamed file changes size and the IPA fails its CRC check
 
 - **Symptom:** packing succeeds, but `unzip -t` or Python's `ZipFile.testzip()` reports a bad CRC for a large deflated file.

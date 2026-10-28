@@ -144,6 +144,12 @@ xcodebuild -project DmIOS.xcodeproj -scheme DmIOS -configuration Release -destin
 # SYMROOT and OBJROOT above keep the unsigned build separate from the interactive Xcode app.
 APP=$DD/Build/Products/Release-iphoneos/DmIOS.app
 [ -n "$APP" ] && [ -d "$APP" ] || die "no built app"; t "app: $APP"
+# Unsigned exports should not carry N_OSO debug-map entries with the owner's
+# local source/object paths. -S removes debugging symbols only; keep runtime
+# symbols and embedded game sections. The interactive --prepare-xcode path
+# exits above, so Xcode's development/debugging products are not stripped here.
+xcrun strip -S "$APP/DmIOS" || die "remove private build paths from export debug metadata"
+t "export: removed debug metadata containing local build paths"
 
 # Straight from the sources: the app without its signature, and without the folders an app built before pack_ipa.py still has (DerivedData keeps resources that left the project;
 # msl/ is also deleted there, it took 1.5 GB of the home disk), then the shader libraries, the add-on content (the RomFS extracted from the player's DLC NSPs, one folder per index:
